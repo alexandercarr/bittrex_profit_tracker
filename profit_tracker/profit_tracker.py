@@ -4,10 +4,11 @@ import json
 from decimal import *
 from time import sleep
 import pprint
+from threading import Thread
 
 #an instance of the bittrex api object is created in main()
 api = None
-#this dictionary will contain all information needed for the display
+#profit_data will contain all information needed for the display
 profit_data = {}
 non_zero_balances = []
 order_histories = {}
@@ -16,13 +17,13 @@ current_prices = {}
 def main():
     global api
     api = bittrex(config.API_KEY, config.API_SECRET)
-    while True:
-        sleep(2)
 
-        get_nonzero_balances()
-        get_order_histories()
-        get_current_prices()
-    #methods to be called periodically: get_order_histories every few minutes, get_nonzero_balances every few minutes, get_ticker every few seconds
+    get_nonzero_balances()
+    get_order_histories()
+    get_current_prices()
+
+    while True:
+        update()
 
 def sandbox_test():
     print("!#!#!#!#!#!#! PROFIT TRACKER MODULE TESTING #!#!#!#!#!")
@@ -31,7 +32,7 @@ def sandbox_test():
     get_nonzero_balances()
     get_order_histories()
     get_current_prices()
-    '''
+
     print()
     print("PROFIT DATA")
     print()
@@ -49,13 +50,14 @@ def sandbox_test():
     print("CURRENT BTC PRICE")
     print(get_current_bitcoin_price())
     print()
-    '''
+
     print("!#!#!#!#!#!#! END PROFIT TRACKER MODULE TESTING #!#!#!#!#!")
 
 def update():
-    time.sleep(5)
+    sleep(5)
+    get_nonzero_balances()
     get_order_histories()
-
+    get_current_prices()
 
 
 #gets a list of dictionaries of all non-zero balances in the user's bitcoin wallet, excluding USDT
@@ -98,25 +100,33 @@ def calculate_profits():
             profit_data[entry['Currency']]['AVG_PURCHASE_PRICE_BTC'] = calculate_average_purchase_price(entry['Currency'], "BTC-"+entry['Currency'], entry['Balance'])
             profit_data[entry['Currency']]['PROFIT_LOSS_USD'] = get_profit_losses(entry['Currency'], "BTC-"+entry['Currency'], Decimal(entry['Balance']))
             profit_data[entry['Currency']]['CURRENT_PRICE_BTC'] = get_current_price("BTC-"+entry['Currency'])
+            profit_data[entry['Currency']]['BALANCE'] = entry['Balance']
             #for order in order_histories[entry['Currency']]:
                 #print(order)
 
 def calculate_average_purchase_price(currency_name, market_name, balance):
     getcontext().prec = 28
+    #print('CALCULATE_AVERAGE_PURCHASE_PRICE: ')
 
     sell_order_types = ['LIMIT_SELL']
     buy_order_types = ['LIMIT_BUY']
     quantity_price = {}
     balance_as_of_this_order = Decimal(0)
     for order in order_histories[currency_name]:
-        if balance_as_of_this_order < balance:
+        #print("ORDER: {}".format(order))
+        #print("BALANCE AS OF THIS ORDER: {} BALANCE: {}".format(balance_as_of_this_order, balance))
+        if balance_as_of_this_order < (balance - (balance * Decimal(.000000001))):
             if order['OrderType'] in buy_order_types:
                 balance_as_of_this_order += Decimal(order['Quantity'])
             elif order['OrderType'] in sell_order_types:
                 balance_as_of_this_order -= Decimal(order['Quantity'])
-        quantity_price[order['TimeStamp']] = []
-        quantity_price[order['TimeStamp']].append(Decimal(order['Quantity']))
-        quantity_price[order['TimeStamp']].append(Decimal((order['PricePerUnit'])))
+            quantity_price[order['TimeStamp']] = []
+            quantity_price[order['TimeStamp']].append(Decimal(order['Quantity']))
+            quantity_price[order['TimeStamp']].append(Decimal((order['PricePerUnit'])))
+        else:
+            break
+
+        #print("########################################")
     weighted_avg_purchase_price = Decimal(0)
 
     for key, entry in quantity_price.items():
@@ -142,11 +152,11 @@ def get_profit_losses(currency_name, market_name, balance):
     profit_per_coin_btc = Decimal(current_price) - Decimal(avg_purchase_price)
     total_btc_profit = Decimal(profit_per_coin_btc * balance)
     profit_total = bitcoin_to_usd_current(total_btc_profit)
-    #print("GET CURRENT PROFIT LOSSES: CURRENCY NAME: {} MARKET_NAME: {} BALANCE: {}".format(currency_name, market_name, balance))
-    #print("AVG_PURCHASE_PRICE: {}".format(avg_purchase_price))
-    #print("CURRENT_PRICE: {}".format(current_price))
-    #print("PROFIT_PER_COIN_BTC: {}".format(profit_per_coin_btc))
-    #print("TOTAL_BTC_PROFIT: {}".format(total_btc_profit))
-    #print("PROFIT_TOTAL (usd): {}".format(profit_total))
-    #print()
+    # print("GET CURRENT PROFIT LOSSES: CURRENCY NAME: {} MARKET_NAME: {} BALANCE: {}".format(currency_name, market_name, balance))
+    # print("AVG_PURCHASE_PRICE: {}".format(avg_purchase_price))
+    # print("CURRENT_PRICE: {}".format(current_price))
+    # print("PROFIT_PER_COIN_BTC: {}".format(profit_per_coin_btc))
+    # print("TOTAL_BTC_PROFIT: {}".format(total_btc_profit))
+    # print("PROFIT_TOTAL (usd): {}".format(profit_total))
+    # print()
     return profit_total
