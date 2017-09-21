@@ -216,10 +216,13 @@ def title_sequence():
         '   |_| |_|_\/_/ \_\___|_|\_\___|_|_\ ',
     ]
 
+    starty = (curses.LINES-1) - (len(title_ascii_art_list) - 1)
+    starty = starty // 2
+    startx = (curses.COLS-1) - (len(title_ascii_art_list[0]) - 1)
+    startx = startx // 2
     for line in title_ascii_art_list:
-        title_window.addstr(line)
-        title_window.addstr('\n')
-
+        title_window.addstr(starty, startx, line)
+        starty += 1
 
 
     title_window.refresh()
