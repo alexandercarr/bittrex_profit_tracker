@@ -37,6 +37,8 @@ def main():
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
     #success colors
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    #info colors
+    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
     #curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_GREEN)
     update_table_values(table_body_win)
     while True:
@@ -68,6 +70,9 @@ def update_table_values(table_body_win):
             table_body_win.addstr(balance_string)
             current_position += len(balance_string) - 1
 
+        else:
+            table_body_win.addstr("N/A")
+            current_position += 2
         while(current_position) < category_start_posiitions[2] - 1:
             table_body_win.addstr("_")
             current_position += 1
@@ -118,6 +123,10 @@ def update_table_values(table_body_win):
         empty_row += ' ' * (curses.COLS-2)
         empty_row += "|"
         table_body_win.addstr(empty_row)
+
+    current_btc_price = "Current BTC price: " + ("{0:.8f}".format(profit_tracker.get_current_bitcoin_price()))
+    footer_y = curses.LINES - 3
+    table_body_win.addstr(footer_y, 0, current_btc_price, curses.color_pair(3))
 
     table_body_win.refresh()
 

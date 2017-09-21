@@ -14,6 +14,7 @@ non_zero_balances = []
 order_histories = {}
 current_prices = {}
 
+
 def main():
     global api
     api = bittrex(config.API_KEY, config.API_SECRET)
@@ -95,6 +96,7 @@ def calculate_profits():
     #calculate_average_purchase_price('ETH', 'BTC-ETH')
     for entry in non_zero_balances:
         if entry['Currency'] != "BTC":
+            #if not (entry['Currency'] in profit_data):
             profit_data[entry['Currency']] = {}
             purchase_price = []
             profit_data[entry['Currency']]['AVG_PURCHASE_PRICE_BTC'] = calculate_average_purchase_price(entry['Currency'], "BTC-"+entry['Currency'], entry['Balance'])
