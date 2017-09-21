@@ -3,6 +3,7 @@ import config
 import json
 from decimal import *
 from time import sleep
+import pprint
 
 #an instance of the bittrex api object is created in main()
 api = None
@@ -30,19 +31,25 @@ def sandbox_test():
     get_nonzero_balances()
     get_order_histories()
     get_current_prices()
+    '''
     print()
     print("PROFIT DATA")
     print()
-    print(profit_data)
+    pprint.pprint(profit_data)
     print()
     print("NON ZERO BALANCES")
-    print(non_zero_balances)
+    pprint.pprint(non_zero_balances)
     print()
     print("ORDER HISTORIES")
-    print(order_histories)
+    pprint.pprint(order_histories)
     print()
     print("CURRENT PRICES")
-    print(current_prices)
+    pprint.pprint(current_prices)
+    print()
+    print("CURRENT BTC PRICE")
+    print(get_current_bitcoin_price())
+    print()
+    '''
     print("!#!#!#!#!#!#! END PROFIT TRACKER MODULE TESTING #!#!#!#!#!")
 
 def update():
@@ -79,9 +86,7 @@ def get_current_prices():
             market = "BTC-" + entry['Currency']
         ticker_info = api.getticker(market)
         current_prices[entry['Currency']] = ticker_info
-    #for key, val in current_prices.items():
-    #    print(key)
-    #    print(val)
+
     calculate_profits()
 
 def calculate_profits():
@@ -124,7 +129,6 @@ def get_current_bitcoin_price():
 
 def bitcoin_to_usd_current(btc_amount):
     return btc_amount * get_current_bitcoin_price()
-    #bitcoin_price =
 
 def get_current_price(market_name):
     data = api.getticker(market_name)
@@ -134,8 +138,15 @@ def get_current_price(market_name):
 def get_profit_losses(currency_name, market_name, balance):
     bitcoin_price = get_current_bitcoin_price()
     avg_purchase_price = profit_data[currency_name]['AVG_PURCHASE_PRICE_BTC']
-    current_price = get_current_price(market_name)
-    profit_per_coin_btc = Decimal(avg_purchase_price) - current_price
-    total_btc_profit = profit_per_coin_btc * balance
+    current_price = Decimal(get_current_price(market_name))
+    profit_per_coin_btc = Decimal(current_price) - Decimal(avg_purchase_price)
+    total_btc_profit = Decimal(profit_per_coin_btc * balance)
     profit_total = bitcoin_to_usd_current(total_btc_profit)
+    #print("GET CURRENT PROFIT LOSSES: CURRENCY NAME: {} MARKET_NAME: {} BALANCE: {}".format(currency_name, market_name, balance))
+    #print("AVG_PURCHASE_PRICE: {}".format(avg_purchase_price))
+    #print("CURRENT_PRICE: {}".format(current_price))
+    #print("PROFIT_PER_COIN_BTC: {}".format(profit_per_coin_btc))
+    #print("TOTAL_BTC_PROFIT: {}".format(total_btc_profit))
+    #print("PROFIT_TOTAL (usd): {}".format(profit_total))
+    #print()
     return profit_total
