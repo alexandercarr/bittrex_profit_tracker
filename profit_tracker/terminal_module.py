@@ -42,7 +42,7 @@ def main():
     #curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_GREEN)
     update_table_values(table_body_win)
     while True:
-        sleep(1)
+        sleep(.5)
         update_table_values(table_body_win)
 
 

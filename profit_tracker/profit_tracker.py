@@ -55,7 +55,7 @@ def sandbox_test():
     print("!#!#!#!#!#!#! END PROFIT TRACKER MODULE TESTING #!#!#!#!#!")
 
 def update():
-    sleep(5)
+    sleep(.5)
     get_nonzero_balances()
     get_order_histories()
     get_current_prices()
@@ -97,7 +97,8 @@ def calculate_profits():
     for entry in non_zero_balances:
         if entry['Currency'] != "BTC":
             #if not (entry['Currency'] in profit_data):
-            profit_data[entry['Currency']] = {}
+            if not (entry['Currency'] in profit_data):
+                profit_data[entry['Currency']] = {}
             purchase_price = []
             profit_data[entry['Currency']]['AVG_PURCHASE_PRICE_BTC'] = calculate_average_purchase_price(entry['Currency'], "BTC-"+entry['Currency'], entry['Balance'])
             profit_data[entry['Currency']]['PROFIT_LOSS_USD'] = get_profit_losses(entry['Currency'], "BTC-"+entry['Currency'], Decimal(entry['Balance']))
