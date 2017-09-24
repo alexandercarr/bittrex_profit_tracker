@@ -105,10 +105,13 @@ def update_table_values(table_body_win):
         current_position += 1
 
         if 'PROFIT_LOSS_USD' in entry:
-            profit_loss_string = "{0:.8f}".format(entry['PROFIT_LOSS_USD'])
+            profit_loss_string = "${0:.5f}".format(entry['PROFIT_LOSS_USD'])
             if entry['PROFIT_LOSS_USD'] > 0:
+                profit_loss_string = "+${0:.5f}".format(entry['PROFIT_LOSS_USD'])
                 table_body_win.addstr(profit_loss_string, curses.color_pair(2))
             else:
+                profit_loss_value_string = "{0:.5f}".format(entry['PROFIT_LOSS_USD'])
+                profit_loss_string = "-$" + profit_loss_value_string[1:]
                 table_body_win.addstr(profit_loss_string, curses.color_pair(1))
             current_position += len(profit_loss_string) - 1
         else:
@@ -124,7 +127,7 @@ def update_table_values(table_body_win):
         empty_row += "|"
         table_body_win.addstr(empty_row)
 
-    current_btc_price = "Current BTC price: " + ("{0:.8f}".format(profit_tracker.get_current_bitcoin_price()))
+    current_btc_price = "Current BTC price: $" + ("{0:.2f}".format(profit_tracker.get_current_bitcoin_price()))
     footer_y = curses.LINES - 3
     table_body_win.addstr(footer_y, 0, current_btc_price, curses.color_pair(3))
 
