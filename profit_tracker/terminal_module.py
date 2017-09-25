@@ -5,7 +5,6 @@ import curses
 import profit_tracker
 from time import sleep
 import numbers
-from termcolor import colored
 
 stdscreen = None
 
@@ -88,7 +87,7 @@ def update_table_values(table_body_win):
             table_body_win.addstr("N/A")
             current_position += 2
 
-        while current_position < category_start_posiitions[3] - 1:
+        while current_position < category_start_posiitions[3] - 2:
             table_body_win.addstr("_")
             current_position += 1
         table_body_win.addstr("|")
@@ -98,7 +97,7 @@ def update_table_values(table_body_win):
         table_body_win.addstr(avg_purchase_price_string)
         current_position += len(avg_purchase_price_string) - 1
 
-        while current_position < category_start_posiitions[4] - 1:
+        while current_position < category_start_posiitions[4] - 3:
             table_body_win.addstr("_")
             current_position += 1
         table_body_win.addstr("|")
