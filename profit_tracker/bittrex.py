@@ -42,7 +42,7 @@ class bittrex(object):
             headers = {}
 
         req = urllib.request.Request(url, headers=headers)
-        response = json.loads(urllib.request.urlopen(req).read())
+        response = json.loads(urllib.request.urlopen(req).read().decode('utf8'))
 
         if response["result"]:
             return response["result"]
